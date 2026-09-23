@@ -1,12 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { apiFetch, ApiError } from "@/lib/api-client";
 import type { InscriptionPayload, TypeUtilisateur } from "@/types";
 
+const bgStyle = {
+  background:
+    "radial-gradient(900px 500px at 15% 10%, rgba(245,128,37,0.18), transparent 60%), radial-gradient(900px 600px at 85% 90%, rgba(24,122,205,0.25), transparent 60%), linear-gradient(135deg, #063F79, #0D5298 55%, #187ACD)",
+};
+
+const inputStyle: React.CSSProperties = { border: "1.5px solid #DCE7F0" };
+
+function handleFocus(e: React.FocusEvent<HTMLInputElement>) {
+  e.currentTarget.style.borderColor = "#187ACD";
+}
+function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+  e.currentTarget.style.borderColor = "#DCE7F0";
+}
+
 export default function InscriptionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [typeUtilisateur, setTypeUtilisateur] = useState<TypeUtilisateur>("CANDIDAT");
   const [email, setEmail] = useState("");
   const [telephone, setTelephone] = useState("");
@@ -18,6 +34,14 @@ export default function InscriptionPage() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [chargement, setChargement] = useState(false);
   const [succes, setSucces] = useState(false);
+
+  useEffect(() => {
+    const role = searchParams.get("role");
+    if (role === "recruteur") setTypeUtilisateur("RECRUTEUR");
+    if (role === "candidat") setTypeUtilisateur("CANDIDAT");
+  }, [searchParams]);
+
+  const roleVerrouille = searchParams.get("role") === "recruteur" || searchParams.get("role") === "candidat";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -66,148 +90,237 @@ export default function InscriptionPage() {
 
   if (succes) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-        <p className="text-green-700 font-medium">Compte créé avec succès !</p>
-        <p className="text-sm text-gray-500 mt-1">Redirection vers la connexion...</p>
+      <div className="min-h-screen flex items-center justify-center p-8" style={bgStyle}>
+        <div
+          className="bg-white rounded-2xl w-full p-9 text-center animate-[loginIn_.35s_cubic-bezier(.2,.7,.3,1)]"
+          style={{ maxWidth: "480px", boxShadow: "0 24px 60px rgba(6,20,32,0.16), 0 8px 20px rgba(6,20,32,0.08)" }}
+        >
+          <p className="font-bold" style={{ color: "#187ACD", fontSize: "18px" }}>
+            Compte créé avec succès !
+          </p>
+          <p className="text-sm mt-2" style={{ color: "#587B95" }}>
+            Redirection vers la connexion...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-      <h2 className="text-lg font-semibold text-gray-900 mb-6">Créer un compte</h2>
-
-      <div className="flex gap-2 mb-6">
+    <div className="min-h-screen flex items-center justify-center p-8" style={bgStyle}>
+      <div
+        className="bg-white rounded-2xl w-full p-9 animate-[loginIn_.35s_cubic-bezier(.2,.7,.3,1)]"
+        style={{ maxWidth: "560px", boxShadow: "0 24px 60px rgba(6,20,32,0.16), 0 8px 20px rgba(6,20,32,0.08)" }}
+      >
         <button
           type="button"
-          onClick={() => setTypeUtilisateur("CANDIDAT")}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium border transition ${
-            typeUtilisateur === "CANDIDAT"
-              ? "bg-gray-900 text-white border-gray-900"
-              : "bg-white text-gray-600 border-gray-300"
-          }`}
+          onClick={() => router.push("/")}
+          className="text-sm font-semibold mb-6 inline-block"
+          style={{ color: "#187ACD" }}
         >
-          Candidat
+          ← Retour
         </button>
-        <button
-          type="button"
-          onClick={() => setTypeUtilisateur("RECRUTEUR")}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium border transition ${
-            typeUtilisateur === "RECRUTEUR"
-              ? "bg-gray-900 text-white border-gray-900"
-              : "bg-white text-gray-600 border-gray-300"
-          }`}
+
+        <div className="flex justify-center mb-5">
+          <Image src="/logo.png" alt="Jobalso" width={170} height={36} className="h-9 w-auto" priority />
+        </div>
+
+        <h2
+          className="text-center font-extrabold mb-8"
+          style={{ color: "#10202E", fontSize: "24px", letterSpacing: "-0.01em" }}
         >
-          Recruteur
-        </button>
-      </div>
+          Créer un compte
+        </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
-          <input
-            type="text"
-            required
-            value={nomPrenom}
-            onChange={(e) => setNomPrenom(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-          <input
-            type="tel"
-            required
-            value={telephone}
-            onChange={(e) => setTelephone(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-            placeholder="+221 77 123 45 67"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
-          <input
-            type="password"
-            required
-            minLength={8}
-            value={motDePasse}
-            onChange={(e) => setMotDePasse(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-          />
-        </div>
-
-        {typeUtilisateur === "RECRUTEUR" && (
-          <div className="space-y-4 pt-2 border-t border-gray-100">
-            <p className="text-sm font-medium text-gray-700 pt-2">Informations entreprise</p>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nom de l&apos;entreprise</label>
-              <input
-                type="text"
-                required
-                value={nomEntreprise}
-                onChange={(e) => setNomEntreprise(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pays</label>
-              <input
-                type="text"
-                required
-                value={paysEntreprise}
-                onChange={(e) => setPaysEntreprise(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Localisation (optionnel)</label>
-              <input
-                type="text"
-                value={localisationEntreprise}
-                onChange={(e) => setLocalisationEntreprise(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-              />
-            </div>
+        {roleVerrouille ? (
+          <div
+            className="text-center rounded-lg py-2.5 text-sm font-bold mb-6"
+            style={{ background: "#F7FAFD", color: "#187ACD", border: "1.5px solid #DCE7F0" }}
+          >
+            {typeUtilisateur === "RECRUTEUR" ? "Espace Recruteur" : "Espace Candidat"}
+          </div>
+        ) : (
+          <div className="flex gap-2 mb-6">
+            <button
+              type="button"
+              onClick={() => setTypeUtilisateur("CANDIDAT")}
+              className="flex-1 rounded-lg py-2.5 text-sm font-bold transition-colors"
+              style={
+                typeUtilisateur === "CANDIDAT"
+                  ? { background: "#187ACD", color: "#fff" }
+                  : { background: "#F7FAFD", color: "#587B95", border: "1.5px solid #DCE7F0" }
+              }
+            >
+              Candidat
+            </button>
+            <button
+              type="button"
+              onClick={() => setTypeUtilisateur("RECRUTEUR")}
+              className="flex-1 rounded-lg py-2.5 text-sm font-bold transition-colors"
+              style={
+                typeUtilisateur === "RECRUTEUR"
+                  ? { background: "#187ACD", color: "#fff" }
+                  : { background: "#F7FAFD", color: "#587B95", border: "1.5px solid #DCE7F0" }
+              }
+            >
+              Recruteur
+            </button>
           </div>
         )}
 
-        {erreur && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-            {erreur}
-          </p>
-        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block font-bold mb-1.5" style={{ color: "#10202E", fontSize: "13px" }}>
+              Nom complet
+            </label>
+            <input
+              type="text"
+              required
+              value={nomPrenom}
+              onChange={(e) => setNomPrenom(e.target.value)}
+              className="w-full rounded-lg px-3.5 py-3 text-sm outline-none transition-colors"
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={chargement}
-          className="w-full bg-gray-900 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50"
-        >
-          {chargement ? "Création..." : "Créer mon compte"}
-        </button>
-      </form>
+          <div>
+            <label className="block font-bold mb-1.5" style={{ color: "#10202E", fontSize: "13px" }}>
+              Email
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="vous@exemple.com"
+              className="w-full rounded-lg px-3.5 py-3 text-sm outline-none transition-colors"
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+          </div>
 
-      <p className="text-sm text-gray-500 text-center mt-6">
-        Déjà un compte ?{" "}
-        <a href="/connexion" className="text-gray-900 font-medium hover:underline">
-          Connectez-vous
-        </a>
-      </p>
+          <div>
+            <label className="block font-bold mb-1.5" style={{ color: "#10202E", fontSize: "13px" }}>
+              Téléphone
+            </label>
+            <input
+              type="tel"
+              required
+              value={telephone}
+              onChange={(e) => setTelephone(e.target.value)}
+              placeholder="+221 77 123 45 67"
+              className="w-full rounded-lg px-3.5 py-3 text-sm outline-none transition-colors"
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold mb-1.5" style={{ color: "#10202E", fontSize: "13px" }}>
+              Mot de passe
+            </label>
+            <input
+              type="password"
+              required
+              minLength={8}
+              value={motDePasse}
+              onChange={(e) => setMotDePasse(e.target.value)}
+              placeholder="••••••••"
+              className="w-full rounded-lg px-3.5 py-3 text-sm outline-none transition-colors"
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+          </div>
+
+          {typeUtilisateur === "RECRUTEUR" && (
+            <div className="space-y-4 pt-4" style={{ borderTop: "1px solid #EDF3F8" }}>
+              <p className="font-bold" style={{ color: "#10202E", fontSize: "13px" }}>
+                Informations entreprise
+              </p>
+
+              <div>
+                <label className="block font-bold mb-1.5" style={{ color: "#10202E", fontSize: "13px" }}>
+                  Nom de l&apos;entreprise
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={nomEntreprise}
+                  onChange={(e) => setNomEntreprise(e.target.value)}
+                  className="w-full rounded-lg px-3.5 py-3 text-sm outline-none transition-colors"
+                  style={inputStyle}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1.5" style={{ color: "#10202E", fontSize: "13px" }}>
+                  Pays
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={paysEntreprise}
+                  onChange={(e) => setPaysEntreprise(e.target.value)}
+                  className="w-full rounded-lg px-3.5 py-3 text-sm outline-none transition-colors"
+                  style={inputStyle}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1.5" style={{ color: "#10202E", fontSize: "13px" }}>
+                  Localisation (optionnel)
+                </label>
+                <input
+                  type="text"
+                  value={localisationEntreprise}
+                  onChange={(e) => setLocalisationEntreprise(e.target.value)}
+                  className="w-full rounded-lg px-3.5 py-3 text-sm outline-none transition-colors"
+                  style={inputStyle}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                />
+              </div>
+            </div>
+          )}
+
+          {erreur && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {erreur}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={chargement}
+            className="w-full rounded-xl py-3.5 text-sm font-bold text-white transition-colors disabled:opacity-50 mt-2"
+            style={{ background: "#187ACD" }}
+            onMouseEnter={(e) => {
+              if (!chargement) e.currentTarget.style.background = "#0D5298";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#187ACD";
+            }}
+          >
+            {chargement ? "Création..." : "Créer mon compte"}
+          </button>
+        </form>
+
+        <p className="text-sm text-center mt-6" style={{ color: "#587B95" }}>
+          Déjà un compte ?{" "}
+          <a href="/connexion" className="font-bold" style={{ color: "#187ACD" }}>
+            Connectez-vous
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

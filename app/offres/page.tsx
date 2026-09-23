@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { apiFetch, ApiError } from "@/lib/api-client";
+import { apiFetch } from "@/lib/api-client";
 import { logout } from "@/lib/auth";
 import type { Offre } from "@/types";
 
@@ -18,45 +18,79 @@ export default function OffresPage() {
       .finally(() => setChargement(false));
   }, []);
 
+  const bgPage: React.CSSProperties = {
+    background:
+      "radial-gradient(900px 500px at 15% 10%, rgba(245,128,37,0.10), transparent 60%), radial-gradient(900px 600px at 85% 90%, rgba(24,122,205,0.10), transparent 60%), #F7FAFD",
+  };
+
   if (chargement) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-gray-500">Chargement...</p>
+      <div className="min-h-screen flex items-center justify-center" style={bgPage}>
+        <p className="text-sm font-semibold" style={{ color: "#587B95" }}>
+          Chargement...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen" style={bgPage}>
+      <header className="bg-white" style={{ borderBottom: "1px solid #DCE7F0" }}>
+        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Mes offres</h1>
-            <p className="text-sm text-gray-500">Espace recruteur</p>
+            <p className="font-extrabold" style={{ fontSize: "18px", color: "#10202E" }}>
+              Jobalso
+            </p>
+            <p className="text-xs font-semibold" style={{ color: "#587B95" }}>
+              Espace recruteur
+            </p>
           </div>
-          <button onClick={logout} className="text-sm text-gray-500 hover:text-gray-900">
+          <button
+            onClick={() => logout("RECRUTEUR")}
+            className="text-sm font-semibold transition-colors"
+            style={{ color: "#587B95" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#10202E")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#587B95")}
+          >
             Déconnexion
           </button>
         </div>
+      </header>
 
-        <div className="flex justify-end mb-4">
+      <main className="max-w-3xl mx-auto px-6 py-10">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="font-extrabold" style={{ fontSize: "24px", color: "#10202E" }}>
+            Vos offres
+          </h1>
           <Link
             href="/offres/nouvelle"
-            className="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-800 transition"
+            className="text-white rounded-lg px-4 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #063F79, #0D5298 55%, #187ACD)" }}
           >
-            + Nouvelle offre
+            Publier une offre
           </Link>
         </div>
 
         {erreur && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
+          <p
+            className="text-sm rounded-lg px-3 py-2 mb-4"
+            style={{ color: "#B4232C", background: "#FDEDEE", border: "1px solid #F6C6C9" }}
+          >
             {erreur}
           </p>
         )}
 
         {offres.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-            <p className="text-sm text-gray-500">Aucune offre pour l&apos;instant.</p>
+          <div
+            className="bg-white rounded-2xl p-12 text-center"
+            style={{ border: "1px solid #DCE7F0", boxShadow: "0 8px 20px rgba(6,20,32,0.06)" }}
+          >
+            <p className="font-extrabold" style={{ fontSize: "17px", color: "#10202E" }}>
+              Aucune offre publiée
+            </p>
+            <p className="text-sm mt-1" style={{ color: "#587B95" }}>
+              Créez votre première offre pour commencer à recevoir des candidats.
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -64,26 +98,41 @@ export default function OffresPage() {
               <Link
                 key={offre.id_offre}
                 href={`/offres/${offre.id_offre}`}
-                className="block bg-white rounded-xl border border-gray-200 p-4 hover:border-gray-400 transition"
+                className="flex items-center justify-between bg-white rounded-xl px-5 py-4 transition-colors"
+                style={{
+                  border: "1px solid #DCE7F0",
+                  borderLeft: `3px solid ${offre.status ? "#187ACD" : "#DCE7F0"}`,
+                  boxShadow: "0 8px 20px rgba(6,20,32,0.04)",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#187ACD")}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#DCE7F0";
+                  e.currentTarget.style.borderLeftColor = offre.status ? "#187ACD" : "#DCE7F0";
+                }}
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{offre.titre_offre}</h3>
-                    <p className="text-sm text-gray-500">{offre.type_contrat || "—"}</p>
-                  </div>
-                  <span
-                    className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      offre.status ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {offre.status ? "Active" : "Inactive"}
-                  </span>
+                <div>
+                  <h3 className="font-semibold" style={{ color: "#10202E" }}>
+                    {offre.titre_offre}
+                  </h3>
+                  <p className="text-sm" style={{ color: "#587B95" }}>
+                    {offre.type_contrat || "Type non précisé"}
+                  </p>
                 </div>
+                <span
+                  className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                  style={
+                    offre.status
+                      ? { color: "#0F7A5C", background: "#E9F8F2" }
+                      : { color: "#587B95", background: "#F1F5F8" }
+                  }
+                >
+                  {offre.status ? "Active" : "Fermée"}
+                </span>
               </Link>
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

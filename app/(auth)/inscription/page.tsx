@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { apiFetch, ApiError } from "@/lib/api-client";
@@ -20,7 +20,7 @@ function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
   e.currentTarget.style.borderColor = "#DCE7F0";
 }
 
-export default function InscriptionPage() {
+function InscriptionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [typeUtilisateur, setTypeUtilisateur] = useState<TypeUtilisateur>("CANDIDAT");
@@ -34,6 +34,7 @@ export default function InscriptionPage() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [chargement, setChargement] = useState(false);
   const [succes, setSucces] = useState(false);
+  const [consentementAccepte, setConsentementAccepte] = useState(false);
 
   useEffect(() => {
     const role = searchParams.get("role");
@@ -54,6 +55,7 @@ export default function InscriptionPage() {
       mot_de_passe: motDePasse,
       nom_prenom: nomPrenom,
       type_utilisateur: typeUtilisateur,
+      consentement_accepte: consentementAccepte,
     };
 
     if (typeUtilisateur === "RECRUTEUR") {
@@ -298,13 +300,35 @@ export default function InscriptionPage() {
             </p>
           )}
 
+          <label className="flex items-start gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={consentementAccepte}
+              onChange={(e) => setConsentementAccepte(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded flex-shrink-0"
+              style={{ accentColor: "#187ACD" }}
+            />
+            <span className="text-sm" style={{ color: "#587B95" }}>
+              J&apos;accepte la{" "}
+              <a
+                href="/politique-confidentialite"
+                target="_blank"
+                className="font-bold underline"
+                style={{ color: "#187ACD" }}
+              >
+                politique de confidentialité
+              </a>{" "}
+              de Jobalso et le traitement de mes données personnelles.
+            </span>
+          </label>
+
           <button
             type="submit"
-            disabled={chargement}
+            disabled={chargement || !consentementAccepte}
             className="w-full rounded-xl py-3.5 text-sm font-bold text-white transition-colors disabled:opacity-50 mt-2"
             style={{ background: "#187ACD" }}
             onMouseEnter={(e) => {
-              if (!chargement) e.currentTarget.style.background = "#0D5298";
+              if (!chargement && consentementAccepte) e.currentTarget.style.background = "#0D5298";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = "#187ACD";
@@ -322,5 +346,13 @@ export default function InscriptionPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function InscriptionPage() {
+  return (
+    <Suspense fallback={null}>
+      <InscriptionContent />
+    </Suspense>
   );
 }

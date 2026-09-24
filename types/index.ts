@@ -16,6 +16,9 @@ export interface Utilisateur {
   status: StatusUtilisateur;
   date_creation: string;
   must_change_password: boolean;
+  consentement_accepte: boolean;
+  consentement_date: string | null;
+  consentement_version: string | null;
 }
 
 export interface InscriptionPayload {
@@ -24,6 +27,7 @@ export interface InscriptionPayload {
   mot_de_passe: string;
   nom_prenom: string;
   type_utilisateur: TypeUtilisateur;
+  consentement_accepte: boolean;
   entreprise?: Entreprise;
 }
 

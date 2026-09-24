@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { apiFetch, ApiError } from "@/lib/api-client";
 import { logout } from "@/lib/auth";
 import type { CV, CVPayload } from "@/types";
@@ -98,15 +99,24 @@ export default function CVPage() {
               Espace talent
             </p>
           </div>
-          <button
-            onClick={() => logout("CANDIDAT")}
-            className="text-sm font-semibold transition-colors"
-            style={{ color: "#587B95" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#10202E")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#587B95")}
-          >
-            Déconnexion
-          </button>
+          <div className="flex items-center gap-5">
+            <Link
+              href="/candidatures"
+              className="text-sm font-semibold"
+              style={{ color: "#187ACD" }}
+            >
+              Mes candidatures
+            </Link>
+            <button
+              onClick={() => logout("CANDIDAT")}
+              className="text-sm font-semibold transition-colors"
+              style={{ color: "#587B95" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#10202E")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#587B95")}
+            >
+              Déconnexion
+            </button>
+          </div>
         </div>
 
         {cv && (

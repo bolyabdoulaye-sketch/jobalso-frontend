@@ -25,6 +25,7 @@ export default function DetailOffrePage() {
   const [majEnCours, setMajEnCours] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState<string | null>(null);
+  const [lienCopie, setLienCopie] = useState(false);
 
   async function chargerDonnees() {
     try {
@@ -95,6 +96,17 @@ export default function DetailOffrePage() {
     }
   }
 
+  async function copierLien() {
+    const lien = `${window.location.origin}/postuler/${offreId}`;
+    try {
+      await navigator.clipboard.writeText(lien);
+      setLienCopie(true);
+      setTimeout(() => setLienCopie(false), 2500);
+    } catch {
+      setErreur("Impossible de copier le lien");
+    }
+  }
+
   const bgPage: React.CSSProperties = {
     background:
       "radial-gradient(900px 500px at 15% 10%, rgba(245,128,37,0.10), transparent 60%), radial-gradient(900px 600px at 85% 90%, rgba(24,122,205,0.10), transparent 60%), #F7FAFD",
@@ -150,6 +162,14 @@ export default function DetailOffrePage() {
               {offre.resume_offre}
             </p>
           )}
+          <button
+            type="button"
+            onClick={copierLien}
+            className="mt-4 rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors"
+            style={{ border: "1.5px solid #187ACD", color: "#187ACD", background: "#fff" }}
+          >
+            {lienCopie ? "Lien copié !" : "Copier le lien de candidature"}
+          </button>
         </div>
 
         <div className="bg-white rounded-2xl p-6" style={panelStyle}>

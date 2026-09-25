@@ -110,9 +110,18 @@ function ConnexionContent() {
           </div>
 
           <div>
-            <label className="block font-bold mb-1.5" style={{ color: "#10202E", fontSize: "13px" }}>
-              Mot de passe
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block font-bold" style={{ color: "#10202E", fontSize: "13px" }}>
+                Mot de passe
+              </label>
+              <a
+                href="/mot-de-passe-oublie"
+                className="text-xs font-semibold"
+                style={{ color: "#187ACD" }}
+              >
+                Mot de passe oublié ?
+              </a>
+            </div>
             <input
               type="password"
               required

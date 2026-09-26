@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch, ApiError } from "@/lib/api-client";
-import type { Offre, Resultat, NiveauCritere } from "@/types";
+import type { Offre, Resultat } from "@/types";
 
 const STATUTS: { valeur: string; libelle: string }[] = [
   { valeur: "RECUE", libelle: "Candidature reçue" },
@@ -12,12 +12,6 @@ const STATUTS: { valeur: string; libelle: string }[] = [
   { valeur: "ENTRETIEN", libelle: "Entretien" },
   { valeur: "DECISION", libelle: "Décision prise" },
 ];
-
-const NIVEAUX_STYLE: Record<NiveauCritere, { libelle: string; color: string; background: string }> = {
-  OBLIGATOIRE: { libelle: "Obligatoire", color: "#B4232C", background: "#FDEDEE" },
-  IMPORTANT: { libelle: "Important", color: "#9A5B00", background: "#FFF1DB" },
-  SOUHAITABLE: { libelle: "Souhaitable", color: "#587B95", background: "#F1F5F8" },
-};
 
 export default function DetailOffrePage() {
   const params = useParams();
@@ -31,7 +25,6 @@ export default function DetailOffrePage() {
   const [majEnCours, setMajEnCours] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState<string | null>(null);
-  const [lienCopie, setLienCopie] = useState(false);
 
   async function chargerDonnees() {
     try {
@@ -102,18 +95,6 @@ export default function DetailOffrePage() {
     }
   }
 
-  async function copierLien() {
-    if (!offre) return;
-    const lien = `${window.location.origin}/postuler/${offre.lien_token}`;
-    try {
-      await navigator.clipboard.writeText(lien);
-      setLienCopie(true);
-      setTimeout(() => setLienCopie(false), 2500);
-    } catch {
-      setErreur("Impossible de copier le lien");
-    }
-  }
-
   const bgPage: React.CSSProperties = {
     background:
       "radial-gradient(900px 500px at 15% 10%, rgba(245,128,37,0.10), transparent 60%), radial-gradient(900px 600px at 85% 90%, rgba(24,122,205,0.10), transparent 60%), #F7FAFD",
@@ -169,41 +150,7 @@ export default function DetailOffrePage() {
               {offre.resume_offre}
             </p>
           )}
-          <button
-            type="button"
-            onClick={copierLien}
-            className="mt-4 rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors"
-            style={{ border: "1.5px solid #187ACD", color: "#187ACD", background: "#fff" }}
-          >
-            {lienCopie ? "Lien copié !" : "Copier le lien de candidature"}
-          </button>
         </div>
-
-        {offre.criteres.length > 0 && (
-          <div className="bg-white rounded-2xl p-6" style={panelStyle}>
-            <h2 className="text-sm font-extrabold mb-1" style={{ color: "#10202E" }}>
-              Critères de sélection
-            </h2>
-            <p className="text-xs mb-4" style={{ color: "#94A9B8" }}>
-              Utilisés pour calculer le score de correspondance des candidatures.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {offre.criteres.map((critere) => {
-                const style = NIVEAUX_STYLE[critere.niveau];
-                return (
-                  <span
-                    key={critere.id_critere}
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
-                    style={{ background: style.background, color: style.color }}
-                  >
-                    {critere.libelle}
-                    <span className="opacity-70">· {style.libelle}</span>
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         <div className="bg-white rounded-2xl p-6" style={panelStyle}>
           <h2 className="text-sm font-extrabold mb-4" style={{ color: "#10202E" }}>

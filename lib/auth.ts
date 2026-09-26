@@ -18,9 +18,11 @@ export function useCurrentUser() {
   return { user, loading };
 }
 
-export function logout() {
+export function logout(role?: "CANDIDAT" | "RECRUTEUR") {
   clearToken();
-  window.location.href = "/connexion";
+  const query =
+    role === "RECRUTEUR" ? "?role=recruteur" : role === "CANDIDAT" ? "?role=candidat" : "";
+  window.location.href = `/connexion${query}`;
 }
 
 export { setToken };

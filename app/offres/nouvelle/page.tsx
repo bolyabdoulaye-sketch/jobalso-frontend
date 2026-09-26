@@ -4,7 +4,23 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch, ApiError } from "@/lib/api-client";
-import type { Offre, OffrePayload } from "@/types";
+import type { Offre, OffrePayload, NiveauCritere } from "@/types";
+
+interface CritereForm {
+  id: string;
+  libelle: string;
+  niveau: NiveauCritere;
+}
+
+const NIVEAUX: { valeur: NiveauCritere; libelle: string }[] = [
+  { valeur: "OBLIGATOIRE", libelle: "Obligatoire" },
+  { valeur: "IMPORTANT", libelle: "Important" },
+  { valeur: "SOUHAITABLE", libelle: "Souhaitable" },
+];
+
+function nouvelId() {
+  return Math.random().toString(36).slice(2);
+}
 
 export default function NouvelleOffrePage() {
   const router = useRouter();
@@ -12,8 +28,25 @@ export default function NouvelleOffrePage() {
   const [typeContrat, setTypeContrat] = useState("");
   const [revenu, setRevenu] = useState("");
   const [resume, setResume] = useState("");
+  const [criteres, setCriteres] = useState<CritereForm[]>([
+    { id: nouvelId(), libelle: "", niveau: "IMPORTANT" },
+  ]);
   const [erreur, setErreur] = useState<string | null>(null);
   const [chargement, setChargement] = useState(false);
+
+  function ajouterCritere() {
+    setCriteres((liste) => [...liste, { id: nouvelId(), libelle: "", niveau: "IMPORTANT" }]);
+  }
+
+  function retirerCritere(id: string) {
+    setCriteres((liste) => liste.filter((c) => c.id !== id));
+  }
+
+  function modifierCritere(id: string, champ: "libelle" | "niveau", valeur: string) {
+    setCriteres((liste) =>
+      liste.map((c) => (c.id === id ? { ...c, [champ]: valeur } : c))
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,6 +58,9 @@ export default function NouvelleOffrePage() {
       type_contrat: typeContrat || undefined,
       revenu: revenu ? parseFloat(revenu) : undefined,
       resume_offre: resume || undefined,
+      criteres: criteres
+        .filter((c) => c.libelle.trim())
+        .map((c) => ({ libelle: c.libelle.trim(), niveau: c.niveau })),
     };
 
     try {
@@ -140,6 +176,65 @@ export default function NouvelleOffrePage() {
               onBlur={onBlur}
               placeholder="Décrivez le poste"
             />
+          </div>
+
+          <div className="pt-2" style={{ borderTop: "1px solid #EDF3F8" }}>
+            <div className="flex items-center justify-between mb-1 mt-3">
+              <label className="block text-sm font-semibold" style={{ color: "#10202E" }}>
+                Critères de sélection
+              </label>
+              <button
+                type="button"
+                onClick={ajouterCritere}
+                className="text-xs font-semibold"
+                style={{ color: "#187ACD" }}
+              >
+                + Ajouter un critère
+              </button>
+            </div>
+            <p className="text-xs mb-3" style={{ color: "#94A9B8" }}>
+              Ces critères déterminent le score de correspondance des candidatures.
+            </p>
+
+            <div className="space-y-2">
+              {criteres.map((critere) => (
+                <div key={critere.id} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={critere.libelle}
+                    onChange={(e) => modifierCritere(critere.id, "libelle", e.target.value)}
+                    placeholder="Ex : Python"
+                    className="flex-1 rounded-lg px-3 py-2 text-sm outline-none transition-colors"
+                    style={inputStyle}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                  />
+                  <select
+                    value={critere.niveau}
+                    onChange={(e) => modifierCritere(critere.id, "niveau", e.target.value)}
+                    className="rounded-lg px-2 py-2 text-sm outline-none"
+                    style={inputStyle}
+                  >
+                    {NIVEAUX.map((n) => (
+                      <option key={n.valeur} value={n.valeur}>
+                        {n.libelle}
+                      </option>
+                    ))}
+                  </select>
+                  {criteres.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => retirerCritere(critere.id)}
+                      className="text-sm font-semibold px-2"
+                      style={{ color: "#B4232C" }}
+                      aria-label="Retirer ce critère"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           {erreur && (

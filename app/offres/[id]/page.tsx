@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch, ApiError } from "@/lib/api-client";
-import type { Offre, Resultat } from "@/types";
+import type { Offre, Resultat, NiveauCritere } from "@/types";
 
 const STATUTS: { valeur: string; libelle: string }[] = [
   { valeur: "RECUE", libelle: "Candidature reçue" },
@@ -12,6 +12,12 @@ const STATUTS: { valeur: string; libelle: string }[] = [
   { valeur: "ENTRETIEN", libelle: "Entretien" },
   { valeur: "DECISION", libelle: "Décision prise" },
 ];
+
+const NIVEAUX_STYLE: Record<NiveauCritere, { libelle: string; color: string; background: string }> = {
+  OBLIGATOIRE: { libelle: "Obligatoire", color: "#B4232C", background: "#FDEDEE" },
+  IMPORTANT: { libelle: "Important", color: "#9A5B00", background: "#FFF1DB" },
+  SOUHAITABLE: { libelle: "Souhaitable", color: "#587B95", background: "#F1F5F8" },
+};
 
 export default function DetailOffrePage() {
   const params = useParams();
@@ -97,7 +103,8 @@ export default function DetailOffrePage() {
   }
 
   async function copierLien() {
-    const lien = `${window.location.origin}/postuler/${offreId}`;
+    if (!offre) return;
+    const lien = `${window.location.origin}/postuler/${offre.lien_token}`;
     try {
       await navigator.clipboard.writeText(lien);
       setLienCopie(true);
@@ -171,6 +178,32 @@ export default function DetailOffrePage() {
             {lienCopie ? "Lien copié !" : "Copier le lien de candidature"}
           </button>
         </div>
+
+        {offre.criteres.length > 0 && (
+          <div className="bg-white rounded-2xl p-6" style={panelStyle}>
+            <h2 className="text-sm font-extrabold mb-1" style={{ color: "#10202E" }}>
+              Critères de sélection
+            </h2>
+            <p className="text-xs mb-4" style={{ color: "#94A9B8" }}>
+              Utilisés pour calculer le score de correspondance des candidatures.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {offre.criteres.map((critere) => {
+                const style = NIVEAUX_STYLE[critere.niveau];
+                return (
+                  <span
+                    key={critere.id_critere}
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+                    style={{ background: style.background, color: style.color }}
+                  >
+                    {critere.libelle}
+                    <span className="opacity-70">· {style.libelle}</span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl p-6" style={panelStyle}>
           <h2 className="text-sm font-extrabold mb-4" style={{ color: "#10202E" }}>

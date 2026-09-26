@@ -1,5 +1,6 @@
 export type TypeUtilisateur = "CANDIDAT" | "RECRUTEUR";
 export type StatusUtilisateur = "ACTIF" | "INACTIF" | "EN_ATTENTE" | "SUPPRIME";
+export type NiveauCritere = "OBLIGATOIRE" | "IMPORTANT" | "SOUHAITABLE";
 
 export interface Entreprise {
   nom_entreprise: string;
@@ -57,6 +58,17 @@ export interface CVPayload {
   certifications?: unknown;
 }
 
+export interface CritereOffre {
+  id_critere: string;
+  libelle: string;
+  niveau: NiveauCritere;
+}
+
+export interface CritereOffrePayload {
+  libelle: string;
+  niveau: NiveauCritere;
+}
+
 export interface Offre {
   id_offre: string;
   id_recruteur: string;
@@ -68,8 +80,10 @@ export interface Offre {
   date_fin: string | null;
   status: boolean;
   resume_offre: string | null;
+  lien_token: string;
   date_publication: string;
   date_modification: string | null;
+  criteres: CritereOffre[];
 }
 
 export interface OffrePayload {
@@ -80,6 +94,7 @@ export interface OffrePayload {
   date_debut?: string;
   date_fin?: string;
   resume_offre?: string;
+  criteres?: CritereOffrePayload[];
 }
 
 export interface Resultat {

@@ -37,7 +37,7 @@ function listeDepuisTexte(valeur: string): string[] {
 
 export default function PostulerPage() {
   const params = useParams();
-  const offreId = params.id as string;
+  const token = params.token as string;
 
   const [offre, setOffre] = useState<OffrePublique | null>(null);
   const [chargement, setChargement] = useState(true);
@@ -57,11 +57,11 @@ export default function PostulerPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    apiFetch<OffrePublique>(`/api/v1/public/offres/${offreId}`, { auth: false })
+    apiFetch<OffrePublique>(`/api/v1/public/offres/${token}`, { auth: false })
       .then(setOffre)
       .catch(() => setIndisponible(true))
       .finally(() => setChargement(false));
-  }, [offreId]);
+  }, [token]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,7 +70,7 @@ export default function PostulerPage() {
 
     try {
       const reponse = await apiFetch<{ message: string }>(
-        `/api/v1/public/offres/${offreId}/postuler`,
+        `/api/v1/public/offres/${token}/postuler`,
         {
           method: "POST",
           auth: false,

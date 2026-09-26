@@ -42,10 +42,13 @@ export interface CV {
   domaine_etude: unknown;
   competences: unknown;
   certifications: unknown;
+  localisation: string | null;
+  type_poste_recherche: string | null;
   statut_cv: string | null;
   code_cv: string;
   date_creation: string;
   date_modification: string | null;
+  taux_completude: number;
 }
 
 export interface CVPayload {
@@ -56,8 +59,9 @@ export interface CVPayload {
   domaine_etude?: unknown;
   competences?: unknown;
   certifications?: unknown;
+  localisation?: string;
+  type_poste_recherche?: string;
 }
-
 export interface CritereOffre {
   id_critere: string;
   libelle: string;
